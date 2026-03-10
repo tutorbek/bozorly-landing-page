@@ -1,302 +1,535 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bozorly.uz | Zamonaviy Bozor Tizimi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --primary-green: #27ae60;
-            --bright-yellow: #f1c40f;
-            --dark-green: #1e8449;
-            --white: #ffffff;
-            --light-gray: #f9f9f9;
-        }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bozorly.uz — Bozoringizni raqamlashtiring</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2300B96B'/%3E%3Ctext x='32' y='46' font-size='30' text-anchor='middle'%3E🛒%3C/text%3E%3C/svg%3E"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --g:       #00B96B;
+      --g-dark:  #008F50;
+      --g-deep:  #006638;
+      --g-lite:  rgba(0,185,107,.09);
+      --g-soft:  rgba(0,185,107,.05);
+      --g-glow:  rgba(0,185,107,.22);
+      --white:   #ffffff;
+      --ink:     #0f1a12;
+      --gray:    #8aa899;
+      --lgray:   #d4e4da;
+      --off:     #f7fbf8;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      background:var(--white);
+      color:var(--ink);
+      font-family:'Barlow Condensed',sans-serif;
+      min-height:100vh;
+      overflow-x:hidden;
+      cursor:none;
+      position:relative;
+    }
 
-        body {
-            background-color: var(--white);
-            color: #333;
-            overflow-x: hidden;
-        }
+    /* ══════════════════════════
+       CURSOR
+    ══════════════════════════ */
+    #cur {
+      position:fixed; z-index:9999; pointer-events:none;
+      width:10px; height:10px; border-radius:50%;
+      background:var(--g);
+      transform:translate(-50%,-50%);
+      transition:width .14s,height .14s;
+      mix-blend-mode:multiply;
+    }
+    #cur-ring {
+      position:fixed; z-index:9998; pointer-events:none;
+      width:30px; height:30px; border-radius:50%;
+      border:1.5px solid var(--g);
+      opacity:.4; transform:translate(-50%,-50%);
+    }
 
-        /* Navigation */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 10%;
-            background: rgba(255, 255, 255, 0.95);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
+    /* ══════════════════════════
+       GRID BG
+    ══════════════════════════ */
+    body::before {
+      content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+      background-image:
+        linear-gradient(rgba(0,185,107,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,185,107,.04) 1px, transparent 1px);
+      background-size:55px 55px;
+    }
 
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary-green);
-        }
+    /* ══════════════════════════
+       ORB GLOWS
+    ══════════════════════════ */
+    .orb {
+      position:fixed; border-radius:50%;
+      filter:blur(100px); pointer-events:none; z-index:0;
+    }
+    .orb1 { width:650px; height:650px; top:-200px; right:-180px;
+      background:radial-gradient(circle, rgba(0,185,107,.11) 0%, transparent 65%);
+      animation:orbF 8s ease-in-out infinite; }
+    .orb2 { width:400px; height:400px; bottom:-100px; left:-90px;
+      background:radial-gradient(circle, rgba(0,143,80,.08) 0%, transparent 65%);
+      animation:orbF 11s ease-in-out infinite reverse; }
+    .orb3 { width:250px; height:250px; top:45%; left:45%;
+      background:radial-gradient(circle, rgba(0,185,107,.05) 0%, transparent 70%);
+      animation:orbF 7s ease-in-out infinite 1.5s; }
+    @keyframes orbF { 0%,100%{transform:translate(0,0);} 50%{transform:translate(-28px,-36px);} }
 
-        .logo span {
-            color: var(--bright-yellow);
-        }
+    /* ══════════════════════════
+       SCAN LINE
+    ══════════════════════════ */
+    .scan {
+      position:fixed; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, var(--g), transparent);
+      opacity:.25; animation:scanM 5s linear infinite;
+      pointer-events:none; z-index:2;
+    }
+    @keyframes scanM { 0%{top:-1px;opacity:0;} 5%{opacity:.25;} 95%{opacity:.25;} 100%{top:100vh;opacity:0;} }
 
-        /* Hero Section */
-        .hero {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0 10%;
-            background: linear-gradient(135deg, #fafffa 0%, #fffdf2 100%);
-            padding-top: 80px;
-        }
+    /* ══════════════════════════
+       MARKET PINS (edges only)
+    ══════════════════════════ */
+    .pins { position:fixed; inset:0; pointer-events:none; z-index:2; overflow:hidden; }
+    .pin  {
+      position:absolute; width:10px; height:10px;
+      animation:pinShow 4s ease-in-out infinite;
+    }
+    .pin::before {
+      content:''; position:absolute; inset:0; border-radius:50%;
+      background:var(--g);
+      box-shadow:0 0 12px var(--g-glow);
+      animation:pinBeat 1.3s ease-in-out infinite;
+    }
+    .pin::after {
+      content:''; position:absolute;
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      width:100%; height:100%; border-radius:50%;
+      border:1.5px solid var(--g);
+      animation:pingR 1.6s ease-out infinite;
+    }
+    /* STRICTLY on edges */
+    .pin:nth-child(1){top:12%; left:3%;  animation-delay:0s;}
+    .pin:nth-child(2){top:40%; left:4%;  animation-delay:-1.3s;}
+    .pin:nth-child(3){top:68%; left:3%;  animation-delay:-2.6s;}
+    .pin:nth-child(4){top:18%; right:4%; animation-delay:-.7s;}
+    .pin:nth-child(5){top:52%; right:3%; animation-delay:-2s;}
+    .pin:nth-child(6){top:78%; right:4%; animation-delay:-3.2s;}
 
-        .hero-content h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
+    @keyframes pinShow  { 0%,100%{opacity:0;transform:scale(.3);} 20%,80%{opacity:1;transform:scale(1);} }
+    @keyframes pinBeat  { 0%,100%{transform:scale(1);} 50%{transform:scale(1.35);} }
+    @keyframes pingR    { 0%{width:100%;height:100%;opacity:.8;} 100%{width:500%;height:500%;opacity:0;} }
 
-        .hero-content p {
-            font-size: 1.2rem;
-            color: #7f8c8d;
-            margin-bottom: 30px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    /* ══════════════════════════
+       FLOATING PRODUCT TAGS (edges)
+    ══════════════════════════ */
+    .ptags { position:fixed; inset:0; pointer-events:none; z-index:3; overflow:hidden; }
+    .ptag {
+      position:absolute;
+      background:rgba(255,255,255,.95);
+      border-radius:8px;
+      padding:10px 14px;
+      box-shadow:0 4px 24px rgba(0,0,0,.06), 0 1px 4px rgba(0,185,107,.08);
+      opacity:0;
+      animation:tagPop 8s ease-in-out infinite;
+      max-width:140px;
+    }
+    .ptag .pname { font-family:'Bebas Neue',sans-serif; font-size:.9rem; letter-spacing:.04em; color:var(--ink); margin-bottom:2px; }
+    .ptag .pprice { font-size:.72rem; color:var(--g-dark); font-weight:700; letter-spacing:.03em; margin-bottom:4px; }
+    .ptag .ptag-lbl {
+      display:inline-block; padding:1px 7px; border-radius:3px;
+      font-size:.54rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      background:var(--g-lite); color:var(--g-dark);
+    }
+    /* Left side */
+    .ptag:nth-child(1){ top:15%; left:0.5%; animation-delay:0s;    animation-duration:7s; }
+    .ptag:nth-child(2){ top:56%; left:0.5%; animation-delay:-3.5s; animation-duration:8.5s; }
+    /* Right side */
+    .ptag:nth-child(3){ top:22%; right:0.5%; animation-delay:-2s;   animation-duration:7.5s; }
+    .ptag:nth-child(4){ top:62%; right:0.5%; animation-delay:-5s;   animation-duration:9s; }
 
-        /* Buttons */
-        .btn-connect {
-            background-color: var(--primary-green);
-            color: white;
-            padding: 15px 35px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 18px;
-            display: inline-flex;
-            align-items: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
-        }
+    @keyframes tagPop {
+      0%   { opacity:0; transform:translateY(16px) scale(.9); }
+      14%  { opacity:1; transform:translateY(0) scale(1); }
+      50%  { opacity:.85; transform:translateY(-6px) scale(1); }
+      86%  { opacity:1; transform:translateY(0) scale(1); }
+      100% { opacity:0; transform:translateY(16px) scale(.9); }
+    }
 
-        .btn-connect i {
-            margin-right: 10px;
-            font-size: 20px;
-        }
+    /* ══════════════════════════
+       PARTICLES
+    ══════════════════════════ */
+    .particles { position:fixed; inset:0; pointer-events:none; z-index:1; }
+    .p { position:absolute; border-radius:50%; animation:pRise linear infinite; }
+    @keyframes pRise {
+      0%  { transform:translateY(106vh); opacity:0; }
+      8%  { opacity:1; }
+      92% { opacity:1; }
+      100%{ transform:translateY(-5vh); opacity:0; }
+    }
 
-        .btn-connect:hover {
-            background-color: var(--bright-yellow);
-            color: #333;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(241, 196, 15, 0.4);
-        }
+    /* ══════════════════════════
+       BOZOR TICKER (top bar)
+    ══════════════════════════ */
+    .ticker-bar {
+      position:fixed; top:0; left:0; right:0; z-index:20;
+      background:rgba(255,255,255,.93);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(0,185,107,.1);
+      padding:9px 0; overflow:hidden;
+    }
+    .ticker {
+      display:flex; gap:60px; width:max-content;
+      animation:tickerScroll 28s linear infinite;
+    }
+    .tick-item {
+      font-family:'Space Mono',monospace;
+      font-size:.65rem; color:var(--gray);
+      white-space:nowrap; display:flex; align-items:center; gap:8px;
+    }
+    .tick-item .dot { color:var(--g); font-size:.85rem; }
+    .tick-item .val { color:var(--g-dark); font-weight:700; }
+    @keyframes tickerScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
 
-        /* Features Section */
-        .features {
-            padding: 100px 10%;
-            background: white;
-        }
+    /* ══════════════════════════
+       TEZ ORADA corner
+    ══════════════════════════ */
+    .tez {
+      position:fixed; top:56px; right:24px; z-index:20;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:.95rem; letter-spacing:.18em; color:var(--g);
+      display:flex; align-items:center; gap:6px;
+      animation:fUp .9s ease .5s both;
+    }
+    .tez::before {
+      content:''; width:6px; height:6px; border-radius:50%;
+      background:var(--g);
+      box-shadow:0 0 8px var(--g-glow);
+      animation:blink 1.2s ease infinite; flex-shrink:0;
+    }
 
-        .section-title {
-            text-align: center;
-            margin-bottom: 60px;
-        }
+    /* ══════════════════════════
+       CORNER MARKS
+    ══════════════════════════ */
+    .cm { position:fixed; width:40px; height:40px; pointer-events:none; z-index:5; }
+    .cm::before,.cm::after { content:''; position:absolute; background:var(--g); opacity:.2; }
+    .cm.tl { top:18px; left:18px; }
+    .cm.tl::before { top:0;left:0;width:100%;height:1px; }
+    .cm.tl::after  { top:0;left:0;width:1px;height:100%; }
+    .cm.br { bottom:18px; right:18px; }
+    .cm.br::before { bottom:0;right:0;width:100%;height:1px; }
+    .cm.br::after  { bottom:0;right:0;width:1px;height:100%; }
 
-        .section-title h2 {
-            font-size: 2.5rem;
-            color: var(--dark-green);
-        }
+    /* ══════════════════════════
+       MAIN CONTENT
+    ══════════════════════════ */
+    main {
+      position:relative; z-index:10;
+      min-height:100vh;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:80px 24px 60px;
+      text-align:center;
+    }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
+    @keyframes fDown { from{opacity:0;transform:translateY(-22px);} to{opacity:1;transform:none;} }
+    @keyframes fUp   { from{opacity:0;transform:translateY(24px);}  to{opacity:1;transform:none;} }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.15;} }
 
-        .card {
-            padding: 40px;
-            background: var(--light-gray);
-            border-radius: 20px;
-            text-align: center;
-            transition: 0.3s;
-            border-bottom: 5px solid transparent;
-        }
+    /* Badge */
+    .badge {
+      display:inline-flex; align-items:center; gap:7px;
+      background:var(--g-lite);
+      border-radius:4px; padding:5px 14px;
+      font-family:'Space Mono',monospace;
+      font-size:.6rem; letter-spacing:.16em;
+      color:var(--g-dark); text-transform:uppercase;
+      margin-bottom:24px;
+      animation:fDown .8s ease .1s both;
+    }
+    .bdot {
+      width:5px; height:5px; border-radius:50%;
+      background:var(--g);
+      box-shadow:0 0 7px var(--g);
+      animation:blink 1.4s ease infinite;
+    }
 
-        .card:hover {
-            transform: translateY(-10px);
-            border-bottom: 5px solid var(--bright-yellow);
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
+    /* Logo */
+    .logo-wrap { margin-bottom:14px; animation:fUp 1s ease .15s both; }
+    .logo {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(4.5rem,15vw,10.5rem);
+      line-height:.92; letter-spacing:.05em;
+      user-select:none; cursor:none; display:inline-block; position:relative;
+    }
+    .logo .boz  { color:var(--ink); position:relative; display:inline; }
+    .logo .orly { color:var(--g);   position:relative; display:inline; }
+    .logo .dot  { color:var(--g-dark); }
+    .logo .uz   { color:var(--ink); position:relative; display:inline; }
 
-        .card i {
-            font-size: 40px;
-            color: var(--primary-green);
-            margin-bottom: 20px;
-        }
+    /* glitch — bozorly */
+    .logo .boz::before,.logo .boz::after {
+      content:attr(data-text); position:absolute; top:0; left:0;
+      font-family:'Bebas Neue',sans-serif; overflow:hidden;
+    }
+    .logo .boz::before { color:var(--g);      clip-path:polygon(0 0,100% 0,100% 32%,0 32%); animation:gT 4s steps(1) infinite; }
+    .logo .boz::after  { color:rgba(0,185,107,.4); clip-path:polygon(0 68%,100% 68%,100% 100%,0 100%); animation:gB 4s steps(1) infinite; }
 
-        /* Stats Section */
-        .stats {
-            background: var(--primary-green);
-            color: white;
-            padding: 80px 10%;
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            text-align: center;
-        }
+    .logo .uz::before,.logo .uz::after {
+      content:attr(data-text); position:absolute; top:0; left:0;
+      font-family:'Bebas Neue',sans-serif; overflow:hidden;
+    }
+    .logo .uz::before { color:var(--g);     clip-path:polygon(0 20%,100% 20%,100% 52%,0 52%); animation:gT 4.6s steps(1) infinite .8s; }
+    .logo .uz::after  { color:rgba(0,143,80,.5); clip-path:polygon(0 60%,100% 60%,100% 86%,0 86%); animation:gB 4.6s steps(1) infinite 1.8s; }
 
-        .stat-item h3 {
-            font-size: 2.5rem;
-            margin-bottom: 5px;
-        }
+    @keyframes gT { 0%,87%,100%{transform:none;opacity:0;} 88%{transform:translate(-4px,-2px) skewX(-7deg);opacity:.9;} 90%{transform:translate(5px,1px);opacity:.6;} 92%{opacity:0;transform:none;} }
+    @keyframes gB { 0%,83%,100%{transform:none;opacity:0;} 84%{transform:translate(5px,3px) skewX(5deg);opacity:.75;} 86%{transform:translate(-3px,-1px);opacity:.45;} 88%{opacity:0;transform:none;} }
 
-        /* Footer */
-        footer {
-            padding: 50px 10%;
-            background: #f4f4f4;
-            text-align: center;
-        }
+    /* Tagline */
+    .tagline {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(1.4rem,3.8vw,2.3rem);
+      letter-spacing:.07em; color:var(--ink); line-height:1.15;
+      margin-bottom:10px;
+      animation:fUp 1s ease .28s both;
+    }
+    .tagline .hi { color:var(--g); }
 
-        .footer-socials {
-            margin-bottom: 20px;
-        }
+    /* Sub tagline */
+    .sub-tag {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(1rem,2.5vw,1.5rem);
+      letter-spacing:.08em; color:var(--gray); line-height:1.2;
+      margin-bottom:12px;
+      animation:fUp 1s ease .36s both;
+    }
 
-        .footer-socials a {
-            color: var(--primary-green);
-            font-size: 24px;
-            margin: 0 15px;
-            transition: 0.3s;
-        }
+    /* Desc */
+    .desc {
+      font-size:clamp(.88rem,1.8vw,1rem);
+      color:var(--gray); max-width:400px;
+      line-height:1.7; font-weight:500; letter-spacing:.02em;
+      margin-bottom:30px;
+      animation:fUp 1s ease .44s both;
+    }
 
-        .footer-socials a:hover {
-            color: var(--bright-yellow);
-        }
+    /* Stats */
+    .stats {
+      display:flex; gap:32px; justify-content:center; align-items:center;
+      margin-bottom:32px;
+      animation:fUp 1s ease .52s both;
+    }
+    .stat { text-align:center; }
+    .stat .num {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:2rem; letter-spacing:.05em; color:var(--ink); line-height:1; margin-bottom:3px;
+    }
+    .stat .num .g { color:var(--g); }
+    .stat .lbl {
+      font-family:'Space Mono',monospace;
+      font-size:.55rem; color:var(--lgray); letter-spacing:.12em; text-transform:uppercase;
+    }
+    .sdiv { width:1px; height:28px; background:var(--lgray); opacity:.6; }
 
-        /* Floating Animation */
-        .floating {
-            animation: float 3s ease-in-out infinite;
-        }
+    /* CTA */
+    .cta-wrap { animation:fUp 1s ease .6s both; }
+    .cta-btn {
+      display:inline-flex; align-items:center; gap:11px;
+      padding:15px 38px; border-radius:6px;
+      background:var(--g); color:var(--white);
+      font-family:'Bebas Neue',sans-serif;
+      font-size:1.1rem; letter-spacing:.12em;
+      text-decoration:none;
+      position:relative; overflow:hidden;
+      transition:transform .2s, box-shadow .2s;
+      box-shadow:0 5px 28px var(--g-glow), 0 1px 0 rgba(255,255,255,.2) inset;
+    }
+    .cta-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.15),transparent); border-radius:inherit; }
+    .cta-btn::after  {
+      content:''; position:absolute; left:-70%; top:0; bottom:0; width:45%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+      transform:skewX(-15deg); animation:shine 3.5s ease 1.5s infinite;
+    }
+    @keyframes shine { 0%{left:-70%} 55%{left:130%} 100%{left:130%} }
+    .cta-btn:hover  { transform:translateY(-3px) scale(1.02); box-shadow:0 10px 40px rgba(0,185,107,.38); }
+    .cta-btn:active { transform:scale(.97); }
+    .tg-ic { width:19px; height:19px; fill:white; flex-shrink:0; }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
+    /* Footer */
+    .foot {
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+      z-index:20; white-space:nowrap;
+      font-family:'Space Mono',monospace;
+      font-size:.55rem; letter-spacing:.13em; text-transform:uppercase;
+      color:var(--lgray);
+      animation:fUp 1s ease .8s both;
+    }
+    .foot a { color:var(--g); text-decoration:none; }
 
-        @media (max-width: 768px) {
-            .hero-content h1 { font-size: 2.5rem; }
-        }
-    </style>
+    /* ══════════════════════════
+       RESPONSIVE
+    ══════════════════════════ */
+    @media(max-width:640px){
+      .stats{gap:16px;}
+      .ptag{display:none;}
+      .pin:nth-child(n+4){display:none;}
+      .ticker-bar{display:none;}
+      .tez{top:18px; right:14px; font-size:.8rem;}
+    }
+    @media(max-width:380px){
+      .stats{gap:10px;}
+      .stat .num{font-size:1.6rem;}
+    }
+  </style>
 </head>
 <body>
 
-    <nav>
-        <div class="logo">Bozor<span>ly</span></div>
-        <a href="https://t.me/bkzd19" class="btn-connect" style="padding: 10px 20px; font-size: 14px;">
-            <i class="fab fa-telegram"></i> Bog'lanish
-        </a>
-    </nav>
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<div class="cm tl"></div>
+<div class="cm br"></div>
+<div class="scan"></div>
+<div class="tez">TEZ ORADA</div>
 
-    <section class="hero">
-        <div class="hero-content">
-            <div class="floating">
-                <i class="fas fa-shopping-basket" style="font-size: 60px; color: var(--bright-yellow); margin-bottom: 20px;"></i>
-            </div>
-            <h1 data-aos="fade-up">Bozoringizni raqamlashtiring</h1>
-            <p data-aos="fade-up" data-aos-delay="200">
-                Bozorly.uz — bu sotuvchilar va haridorlar uchun eng qulay, tezkor va xavfsiz ekotizim. Biz bilan savdo qilish yanada oson!
-            </p>
-            <div data-aos="zoom-in" data-aos-delay="400">
-                <a href="https://t.me/bkzd19" class="btn-connect">
-                    <i class="fab fa-telegram"></i> Telegram orqali ulanish
-                </a>
-            </div>
-        </div>
-    </section>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<div class="particles" id="particles"></div>
 
-    <section class="features">
-        <div class="section-title" data-aos="fade-down">
-            <h2>Nega aynan biz?</h2>
-        </div>
-        <div class="grid">
-            <div class="card" data-aos="fade-up" data-aos-delay="100">
-                <i class="fas fa-bolt"></i>
-                <h3>Tezkor Savdo</h3>
-                <p>Buyurtmalar soniyalar ichida qayta ishlanadi va yetkaziladi.</p>
-            </div>
-            <div class="card" data-aos="fade-up" data-aos-delay="200">
-                <i class="fas fa-shield-alt"></i>
-                <h3>Xavfsiz To'lov</h3>
-                <p>Har bir tranzaksiya to'liq himoyalangan va kafolatlangan.</p>
-            </div>
-            <div class="card" data-aos="fade-up" data-aos-delay="300">
-                <i class="fas fa-chart-line"></i>
-                <h3>Analitika</h3>
-                <p>Sotuvlaringizni real vaqt rejimida kuzatib boring.</p>
-            </div>
-        </div>
-    </section>
+<!-- Ticker top bar -->
+<div class="ticker-bar">
+  <div class="ticker" id="ticker"></div>
+</div>
 
-    <section class="stats">
-        <div class="stat-item" data-aos="counter-up">
-            <h3 class="counter">10,000+</h3>
-            <p>Foydalanuvchilar</p>
-        </div>
-        <div class="stat-item" data-aos="counter-up">
-            <h3>500+</h3>
-            <p>Do'konlar</p>
-        </div>
-        <div class="stat-item" data-aos="counter-up">
-            <h3>24/7</h3>
-            <p>Qo'llab-quvvatlash</p>
-        </div>
-    </section>
+<!-- Market pins — edges only -->
+<div class="pins">
+  <div class="pin"></div><div class="pin"></div><div class="pin"></div>
+  <div class="pin"></div><div class="pin"></div><div class="pin"></div>
+</div>
 
-    <footer>
-        <div class="footer-socials">
-            <a href="https://t.me/bkzd19"><i class="fab fa-telegram"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-facebook"></i></a>
-        </div>
-        <p>&copy; 2024 Bozorly.uz — Barcha huquqlar himoyalangan.</p>
-    </footer>
+<!-- Floating product tags — edges only -->
+<div class="ptags">
+  <div class="ptag">
+    <div class="pname">Pomidor</div>
+    <div class="pprice">8 500 so'm/kg</div>
+    <div class="ptag-lbl">✓ Sotildi</div>
+  </div>
+  <div class="ptag">
+    <div class="pname">Olma</div>
+    <div class="pprice">12 000 so'm/kg</div>
+    <div class="ptag-lbl">🔥 Yangi</div>
+  </div>
+  <div class="ptag">
+    <div class="pname">Kartoshka</div>
+    <div class="pprice">5 000 so'm/kg</div>
+    <div class="ptag-lbl">⚡ Tez yetkazish</div>
+  </div>
+  <div class="ptag">
+    <div class="pname">Piyoz</div>
+    <div class="pprice">3 500 so'm/kg</div>
+    <div class="ptag-lbl">💚 Arzon</div>
+  </div>
+</div>
 
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        // Animatsiyalarni ishga tushirish
-        AOS.init({
-            duration: 1000,
-            once: false,
-            mirror: true
-        });
+<main>
+  <div class="badge"><div class="bdot"></div>Intelligent Shop Your Home</div>
 
-        // Skroll qilinganda Nav barga soya berish
-        window.addEventListener('scroll', function() {
-            const nav = document.querySelector('nav');
-            if (window.scrollY > 50) {
-                nav.style.boxShadow = '0 5px 20px rgba(0,0,0,0.1)';
-            } else {
-                nav.style.boxShadow = 'none';
-            }
-        });
-    </script>
+  <div class="logo-wrap">
+    <div class="logo">
+      <span class="boz" data-text="BOZOR">BOZOR</span><span class="orly">LY</span><span class="dot">.</span><span class="uz" data-text="UZ">UZ</span>
+    </div>
+  </div>
+
+  <p class="tagline">Bozoringizni <span class="hi">raqamlashtiring.</span></p>
+  <p class="sub-tag">Sotuvchilar va haridorlar uchun eng qulay ekotizim</p>
+
+  <p class="desc">
+    Biz bilan savdo qilish yanada oson!<br>
+    Minimalizm, tezlik va intellektual yondashuv — tez kunda.
+  </p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="num"><span id="n1">0</span><span class="g">+</span></div>
+      <div class="lbl">Sotuvchi</div>
+    </div>
+    <div class="sdiv"></div>
+    <div class="stat">
+      <div class="num"><span id="n2">0</span><span class="g">+</span></div>
+      <div class="lbl">Mahsulot</div>
+    </div>
+    <div class="sdiv"></div>
+    <div class="stat">
+      <div class="num"><span id="n3">0</span><span class="g">K</span></div>
+      <div class="lbl">Haridor</div>
+    </div>
+  </div>
+
+  <div class="cta-wrap">
+    <a href="https://t.me/bkzd19" target="_blank" rel="noopener" class="cta-btn">
+      <svg class="tg-ic" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+      </svg>
+      Telegram orqali bog'lanish
+    </a>
+  </div>
+</main>
+
+<div class="foot">&copy; 2025 <a href="https://t.me/bkzd19">Bozorly.uz</a> — Savdoni yangi davrga olib chiqamiz</div>
+
+<script>
+  // Cursor
+  const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+  (function loop(){rx+=(mx-rx)*.11;ry+=(my-ry)*.11;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+  document.querySelectorAll('a').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cur.style.width='18px';cur.style.height='18px';ring.style.width='46px';ring.style.height='46px';});
+    el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';ring.style.width='30px';ring.style.height='30px';});
+  });
+
+  // Ticker
+  const items = [
+    {l:'Pomidor',v:'8 500 so\'m'},
+    {l:'Olma',v:'12 000 so\'m'},
+    {l:'Kartoshka',v:'5 000 so\'m'},
+    {l:'Non',v:'4 000 so\'m'},
+    {l:'Guruch',v:'18 000 so\'m'},
+    {l:'Sut',v:'9 500 so\'m'},
+    {l:'Tuxum',v:'1 200 so\'m'},
+    {l:'Limon',v:'6 000 so\'m'},
+    {l:'Sabzi',v:'4 500 so\'m'},
+    {l:'Qovun',v:'7 000 so\'m'},
+  ];
+  const tk=document.getElementById('ticker');
+  if(tk){
+    tk.innerHTML=[...items,...items].map(i=>
+      `<div class="tick-item"><span class="dot">◆</span>${i.l} — <span class="val">${i.v}</span></div>`
+    ).join('');
+  }
+
+  // Counters
+  function countUp(id,target,dur){
+    const el=document.getElementById(id); if(!el)return;
+    let v=0; const s=target/(dur/16);
+    const iv=setInterval(()=>{v+=s;if(v>=target){el.textContent=target;clearInterval(iv);return;}el.textContent=Math.floor(v);},16);
+  }
+  setTimeout(()=>{countUp('n1',2400,1800);countUp('n2',18000,2000);countUp('n3',85,1500);},700);
+
+  // Particles — tiny, edges, subtle
+  const pc=document.getElementById('particles');
+  for(let i=0;i<22;i++){
+    const p=document.createElement('div'); p.className='p';
+    const s=Math.random()*2.5+1;
+    p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;
+      background:rgba(0,185,107,${(.05+Math.random()*.13).toFixed(2)});
+      animation-duration:${7+Math.random()*9}s;animation-delay:${Math.random()*12}s;`;
+    pc.appendChild(p);
+  }
+</script>
 </body>
 </html>
